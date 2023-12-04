@@ -80,9 +80,22 @@ def part_two(schematic):
 			x += 1
 		y += 1
 		x = 0
-	valued_gears = {part.gear_location for part in schematic_parts }
+	valued_gears = [part.gear_location for part in schematic_parts]
+	while valued_gears.count(''):
+		valued_gears.remove('')
+	gears_to_remove = set()
+	for gear_location in valued_gears:
+		if valued_gears.count(gear_location) != 2:
+			gears_to_remove.add(gear_location)
+	for entry in gears_to_remove:
+		while valued_gears.count(entry):
+			valued_gears.remove(entry)
 	gear_ratio_total = 0
-	for gear_loc in valued_gears:
+	distinct_gears = list(set(valued_gears))
+	for gear_loc in distinct_gears:
 		parts_adjacent = [part.value for part in schematic_parts if part.gear_location == gear_loc]
-		
-	print('Solution for Day 3, Part 1:' + str(sum(part.value for part in schematic_parts)))
+		gear_ratio = 1
+		for part_value in parts_adjacent:
+			gear_ratio = gear_ratio * part_value
+		gear_ratio_total += gear_ratio
+	print('Solution for Day 3, Part 1:' + str(gear_ratio_total))
