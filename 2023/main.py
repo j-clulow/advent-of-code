@@ -29,6 +29,12 @@ def run_three():
 	from day_three import part_two
 	part_two(data)
 
+def run_four():
+	data = read_puzzle_input(".\datafiles\day_four.txt")
+	from day_four import part_one
+	part_one(data)
+
 # run_one()
 # run_two()
-run_three()
+# run_three()
+run_four()
