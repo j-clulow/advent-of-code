@@ -42,11 +42,9 @@ def part_two(pile):
 		winning_numbers = get_winning_numbers(card)
 		card_numbers = get_card_numbers(card)
 		card_matches = calculate_matches(winning_numbers, card_numbers)
-		print("Card matches [" + str(count) + "]: " + str(card_matches))
 		messages = []
 		for index in range(count+1, count+card_matches+1):
 			messages.append(("Adding " + str(scratchcards[str(count)]) + " copies of card " + str(index)))
 			scratchcards[str(index)] += scratchcards[str(count)]
-		print(messages)
 		count += 1
 	print("Solution for Day 4, Part 2 is " + str(sum(scratchcards.values())))
