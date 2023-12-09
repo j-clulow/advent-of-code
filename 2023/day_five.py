@@ -31,6 +31,31 @@ def source_to_dest(map_definitions,source_entries):
 	for definition in map_definitions:
 		links = get_map(definition)
 		for entry in list(source_entries):
+			if links.get(entry) != None:
+				source_destination_links[entry] = links[entry]
+				source_entries.remove(entry)
+	for entry in source_entries:
+		source_destination_links[entry] = entry
+	return source_destination_links
+
+def soil_requirements(seed_infos,seed_soil_map):
+	seeds = [seed_info.seed for seed_info in seed_infos]
+	links = source_to_dest(seed_soil_map, seeds)
+	for seed_info in seed_infos:
+		seed_info.soil = links[seed_info.seed]
+
+def fertilizer_requirements(seed_infos, soil_fertilizer_map):
+	soils = [seed_info.soil for seed_info in seed_infos]
+	links = source_to_dest(soil_fertilizer_map, soils)
+	for seed_info in seed_infos:
+		seed_info.fertilizer = links[seed_info.soil]
+
+def water_requirements(seed_infos, fertilizer_water_map):
+	fertilizers = [seed_info.fertilizer for seed_info in seed_infos]
+	links = source_to_dest(fertilizer_water_map, fertilizers)
+	for seed_info in seed_infos:
+		seed_info.water = links[seed_info.fertilizer]
+		
 			
 
 def calculate_seed_requirements(seed,mappings):
@@ -73,15 +98,6 @@ def part_one(almanac):
 			section = line
 		else:
 			section = ''
-	# print(sections[1])
-	seed_soil_mapping = get_maps(sections[0])
-	soil_fertiliser_mapping = get_maps(sections[1])
-	fertilser_water_mapping = get_maps(sections[2])
-	water_light_mapping = get_maps(sections[3])
-	light_temperature_mapping = get_maps(sections[4])
-	temperature_humidity_mapping = get_maps(sections[5])
-	humidity_location_mapping = get_maps(sections[6])
-	mappings = [seed_soil_mapping, soil_fertiliser_mapping, fertilser_water_mapping, water_light_mapping, light_temperature_mapping, temperature_humidity_mapping, humidity_location_mapping]
 	seed_information = []
 	for seed in seeds:
 		seed_information.append(calculate_seed_requirements(seed, mappings))
