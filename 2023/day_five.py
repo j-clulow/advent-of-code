@@ -17,62 +17,83 @@ class SeedMatching:
 	def __str__(self):
 		return "[{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}]\n".format(self.seed, self.soil, self.fertilizer, self.water, self.light, self.temperature, self.humidity, self.location)
 
-def get_map(map_definition):
+def get_map(map_definition,source_values):
 	map_links = dict()
-	map_source = int(map_definition[0])
-	map_dest = int(map_definition[1])
+	map_dest = int(map_definition[0])
+	map_source = int(map_definition[1])
 	length = int(map_definition[2])
-	for index in range(0,length):
-		map_links[map_source+index] = map_dest+index
+	max_source = map_source+length
+	for source in source_values:
+		if int(source) >= int(map_source) and int(source) <= int(max_source):
+			map_links[int(source)] = int(map_dest)+(int(source)-int(map_source))
 	return map_links
 
 def source_to_dest(map_definitions,source_entries):
 	source_destination_links = dict()
+	entries = list(source_entries)
 	for definition in map_definitions:
-		links = get_map(definition)
-		for entry in list(source_entries):
-			if links.get(entry) != None:
-				source_destination_links[entry] = links[entry]
-				source_entries.remove(entry)
-	for entry in source_entries:
-		source_destination_links[entry] = entry
+		links = get_map(definition, entries)
+		for entry in list(entries):
+			if links.get(int(entry)) != None:
+				source_destination_links[int(entry)] = links[int(entry)]
+				entries.remove(int(entry))
+	for entry in entries:
+		source_destination_links[int(entry)] = int(entry)
 	return source_destination_links
 
 def soil_requirements(seed_infos,seed_soil_map):
 	seeds = [seed_info.seed for seed_info in seed_infos]
 	links = source_to_dest(seed_soil_map, seeds)
 	for seed_info in seed_infos:
-		seed_info.soil = links[seed_info.seed]
+		seed_info.soil = int(links[int(seed_info.seed)])
 
 def fertilizer_requirements(seed_infos, soil_fertilizer_map):
 	soils = [seed_info.soil for seed_info in seed_infos]
 	links = source_to_dest(soil_fertilizer_map, soils)
 	for seed_info in seed_infos:
-		seed_info.fertilizer = links[seed_info.soil]
+		seed_info.fertilizer = int(links[int(seed_info.soil)])
 
 def water_requirements(seed_infos, fertilizer_water_map):
 	fertilizers = [seed_info.fertilizer for seed_info in seed_infos]
 	links = source_to_dest(fertilizer_water_map, fertilizers)
 	for seed_info in seed_infos:
-		seed_info.water = links[seed_info.fertilizer]
+		seed_info.water = int(links[int(seed_info.fertilizer)])
 		
-			
+def light_requirements(seed_infos, water_light_map):
+	waters = [seed_info.water for seed_info in seed_infos]
+	links = source_to_dest(water_light_map, waters)
+	for seed_info in seed_infos:
+		seed_info.light = int(links[int(seed_info.water)])
 
-def calculate_seed_requirements(seed,mappings):
-	seed_information = SeedMatching(seed)
-	seed_information.soil = next((entry[1] for entry in mappings[0] if entry[0] == seed_information.seed),seed_information.seed)
-	seed_information.fertilizer = next((entry[1] for entry in mappings[1] if entry[0] == seed_information.soil), seed_information.soil)
-	seed_information.water = next((entry[1] for entry in mappings[2] if entry[0] == seed_information.fertilizer), seed_information.fertilizer)
-	seed_information.light = next((entry[1] for entry in mappings[3] if entry[0] == seed_information.water), seed_information.water)
-	seed_information.temperature = next((entry[1] for entry in mappings[4] if entry[0] == seed_information.light), seed_information.light)
-	seed_information.humidity = next((entry[1] for entry in mappings[5] if entry[0] == seed_information.temperature), seed_information.temperature)
-	seed_information.location = next((entry[1] for entry in mappings[6] if entry[0] == seed_information.humidity), seed_information.humidity)
-	return seed_information
+def temperature_requirements(seed_infos, light_temperature_map):
+	lights = [seed_info.light for seed_info in seed_infos]
+	links = source_to_dest(light_temperature_map, lights)
+	for seed_info in seed_infos:
+		seed_info.temperature = int(links[int(seed_info.light)])
 
-def part_one(almanac):
-	seeds = almanac[0].split(': ')[1].split(' ')
+def humidity_requirements(seed_infos, temperature_humidity_map):
+	temps = [seed_info.temperature for seed_info in seed_infos]
+	links = source_to_dest(temperature_humidity_map, temps)
+	for seed_info in seed_infos:
+		seed_info.humidity = int(links[int(seed_info.temperature)])
+
+def location_requirements(seed_infos, humidity_location_map):
+	humidities = [seed_info.humidity for seed_info in seed_infos]
+	links = source_to_dest(humidity_location_map, humidities)
+	for seed_info in seed_infos:
+		seed_info.location = int(links[int(seed_info.humidity)])
+
+def calculate_seed_requirements(seed_infos,mappings):
+	soil_requirements(seed_infos,mappings[0])
+	fertilizer_requirements(seed_infos,mappings[1])
+	water_requirements(seed_infos,mappings[2])
+	light_requirements(seed_infos,mappings[3])
+	temperature_requirements(seed_infos,mappings[4])
+	humidity_requirements(seed_infos,mappings[5])
+	location_requirements(seed_infos,mappings[6])
+
+def process_almanac(almanac, sections):
 	section = ''
-	sections = [[],[],[],[],[],[],[]]
 	for line in almanac:
 		if line == almanac[0] or line == almanac[1]:
 			continue
@@ -98,10 +119,29 @@ def part_one(almanac):
 			section = line
 		else:
 			section = ''
+
+def get_minimum_location(seeds, almanac_sections):
+	min_location = -1
 	seed_information = []
 	for seed in seeds:
-		seed_information.append(calculate_seed_requirements(seed, mappings))
-	print(seed_information)
+		seed_information.append(SeedMatching(int(seed)))
+	calculate_seed_requirements(seed_information, almanac_sections)
+	for seed_info in seed_information:
+		if min_location == -1:
+			min_location = seed_info.location
+		else:
+			min_location = min(min_location, seed_info.location)
+	return min_location
+	
+
+def part_one(almanac):
+	seeds = almanac[0].split(': ')[1].split(' ')
+	sections = [[],[],[],[],[],[],[]]
+	process_almanac(almanac, sections)
+	seed_information = []
+	for seed in seeds:
+		seed_information.append(SeedMatching(int(seed)))
+	calculate_seed_requirements(seed_information, sections)
 	min_loc = -1
 	for seed_info in seed_information:
 		if min_loc == -1:
@@ -109,4 +149,33 @@ def part_one(almanac):
 		else:
 			min_loc = min(min_loc, seed_info.location)
 	print("Day 5, Part 1 Solution: " + str(min_loc))
-	
+
+def part_two(almanac):
+	seed_definitions = almanac[0].split(': ')[1].split(' ')
+	count = int(len(seed_definitions)/2)
+	print(count)
+	message_count = 1
+	update_count = 0
+	seeds = list()
+	sections = [[],[],[],[],[],[],[]]
+	process_almanac(almanac, sections)
+	min_loc = -1
+	for index in range(0,count):
+		seed_start = int(seed_definitions[index*2])
+		seed_range = int(seed_definitions[index*2+1])
+		for seed_increment in range(0,seed_range+1):
+			seeds.append(seed_start+seed_increment)
+			if len(seeds) >= 10000 or seed_increment == seed_range:
+				batch_minimum = int(get_minimum_location(seeds,sections))
+				if min_loc == -1:
+					min_loc = batch_minimum
+				else:
+					min_loc = min(batch_minimum, min_loc)
+				seeds.clear()
+				if update_count < 100:
+					update_count += 1
+				if update_count == 100:
+					print("Finished Batch {0}. Minimum is {1}".format(message_count,min_loc))
+					update_count = 0
+					message_count += 1
+	print("Day 5, Part 2 Solution: " + str(min_loc))
