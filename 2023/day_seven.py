@@ -18,6 +18,42 @@ class CamelCardHand:
 		self.hand = cards
 		self.bid = bid
 
+	def __eq__(self, other):
+		if other == None:
+			return False
+		if self.score_type != other.score_type:
+			return False
+		for index in range(0,len(self.hand)):
+			if self.hand[index] != other.hand[index]:
+				return False
+		return True
+	
+	def __gt__(self, other):
+		if other == None:
+			return False
+		if self.score_type > other.score_type:
+			return True
+		elif self.score_type < other.score_type:
+			return False
+		else:
+			for index in range(0,self.hand):
+				if self.hand[index] == other.hand[index]:
+					continue
+				else:
+					return self.hand[index] > other.hand[index]
+		return False
+	
+	def __lt__(self, other):
+		return not (self > other or self == other)
+	
+def compare_hands(hand1, hand2):
+	if hand1 < hand2:
+		return -1
+	elif hand1 > hand2:
+		return 1
+	else:
+		return 0
+
 def is_five_kind(check_hand):
 	return check_hand.count(check_hand[0]) == 5
 
@@ -103,3 +139,12 @@ def set_hand_type(camel_card_hand):
 		return
 	else:
 		camel_card_hand.score_type = HandType.HIGH_CARD
+
+def part_one(hands):
+	camel_card_hands = list()
+	for item in hands:
+		cards = list(item.split(' ')[0])
+		bid = int(item.split(' ')[1])
+		camel_hard_hands.append(CamelCardHand(cards,bid))
+	for camel_card_hand in camel_card_hands:
+		set_hand_type(camel_card_hand)
