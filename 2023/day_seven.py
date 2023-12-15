@@ -7,6 +7,11 @@ class HandType(Enum):
 	FULL_HOUSE = 5
 	FOUR_KIND = 6
 	FIVE_KIND = 7
+class CardLabel(Enum):
+	TWO = 2
+	THREE = 3
+	FOUR = 4
+	FIVE = 5
 
 class CamelCardHand:
 	hand = []
@@ -53,6 +58,9 @@ def compare_hands(hand1, hand2):
 		return 1
 	else:
 		return 0
+
+def compare_labels(label1, label2):
+
 
 def is_five_kind(check_hand):
 	return check_hand.count(check_hand[0]) == 5
@@ -148,3 +156,4 @@ def part_one(hands):
 		camel_hard_hands.append(CamelCardHand(cards,bid))
 	for camel_card_hand in camel_card_hands:
 		set_hand_type(camel_card_hand)
+	camel_card_hands.sort(key=compare_hands)
