@@ -54,8 +54,8 @@ def run_seven():
 	data = read_puzzle_input(".\datafiles\day_seven.txt")
 	from day_seven import part_one
 	part_one(data)
-	# from day_seven import part_two
-	# part_two(data)
+	from day_seven import part_two
+	part_two(data)
 
 # run_one()
 # run_two()
