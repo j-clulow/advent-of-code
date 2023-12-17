@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import cmp_to_key
 class HandType(Enum):
 	HIGH_CARD = 1
 	ONE_PAIR = 2
@@ -7,11 +8,53 @@ class HandType(Enum):
 	FULL_HOUSE = 5
 	FOUR_KIND = 6
 	FIVE_KIND = 7
+
+	def __eq__(self, other):
+		if type(self) == type(other):
+			return self.value == other.value
+		else:
+			raise('Cannot compare Enums of different classes.')
+	def __lt__(self, other):
+		if type(self) == type(other):
+			return self.value < other.value
+		else:
+			raise('Cannot compare Enums of different classes.')
+	def __gt__(self, other):
+		if type(self) == type(other):
+			return self.value > other.value
+		else:
+			raise('Cannot compare Enums of different classes.')
+
 class CardLabel(Enum):
 	TWO = 2
 	THREE = 3
 	FOUR = 4
 	FIVE = 5
+	SIX = 6
+	SEVEN = 7
+	EIGHT = 8
+	NINE = 9
+	TEN = 10
+	JACK = 11
+	QUEEN = 12
+	KING = 13
+	ACE = 14
+
+	def __eq__(self, other):
+		if type(self) == type(other):
+			return self.value == other.value
+		else:
+			raise('Cannot compare Enums of different classes.')
+	def __lt__(self, other):
+		if type(self) == type(other):
+			return self.value < other.value
+		else:
+			raise('Cannot compare Enums of different classes.')
+	def __gt__(self, other):
+		if type(self) == type(other):
+			return self.value > other.value
+		else:
+			raise('Cannot compare Enums of different classes.')
 
 class CamelCardHand:
 	hand = []
@@ -22,6 +65,7 @@ class CamelCardHand:
 	def __init__(self,cards, bid):
 		self.hand = cards
 		self.bid = bid
+	
 
 	def __eq__(self, other):
 		if other == None:
@@ -51,16 +95,32 @@ class CamelCardHand:
 	def __lt__(self, other):
 		return not (self > other or self == other)
 	
-def compare_hands(hand1, hand2):
-	if hand1 < hand2:
+	def __str__(self):
+		return 'Cards in Hand: {0}. Score Type is: {1}. Rank is :{2}. Bid at: {3}'.format(self.hand, self.score_type.name, self.rank, self.bid)
+	
+def compare_labels(label1, label2):
+	if label1 < label2:
 		return -1
-	elif hand1 > hand2:
+	elif label1 > label2:
 		return 1
 	else:
 		return 0
-
-def compare_labels(label1, label2):
-
+	
+def compare_hands(hand1, hand2):
+	if hand1.score_type < hand2.score_type:
+		return -1
+	elif hand1.score_type > hand2.score_type:
+		return 1
+	else:
+		hand1_conv = convert_hand_to_labels(hand1.hand)
+		hand2_conv = convert_hand_to_labels(hand2.hand)
+		for index in range(0,len(hand1_conv)):
+			result = compare_labels(hand1_conv[index],hand2_conv[index])
+			if result == 0:
+				continue
+			else:
+				return result
+	return 1
 
 def is_five_kind(check_hand):
 	return check_hand.count(check_hand[0]) == 5
@@ -147,13 +207,30 @@ def set_hand_type(camel_card_hand):
 		return
 	else:
 		camel_card_hand.score_type = HandType.HIGH_CARD
+	
+def convert_hand_to_labels(char_hand):
+	conversions = {'2':CardLabel.TWO, '3':CardLabel.THREE, '4':CardLabel.FOUR, '5': CardLabel.FIVE,
+				'6':CardLabel.SIX, '7':CardLabel.SEVEN, '8':CardLabel.EIGHT, '9':CardLabel.NINE,
+				'T':CardLabel.TEN,'J':CardLabel.JACK, 'Q':CardLabel.QUEEN, 'K':CardLabel.KING,
+				'A':CardLabel.ACE}
+	label_hand = list()
+	for index in range(0,len(char_hand)):
+		label_hand.append(conversions[char_hand[index]])
+	return label_hand
 
 def part_one(hands):
 	camel_card_hands = list()
 	for item in hands:
 		cards = list(item.split(' ')[0])
 		bid = int(item.split(' ')[1])
-		camel_hard_hands.append(CamelCardHand(cards,bid))
+		camel_card_hands.append(CamelCardHand(cards,bid))
 	for camel_card_hand in camel_card_hands:
 		set_hand_type(camel_card_hand)
-	camel_card_hands.sort(key=compare_hands)
+	sorted_hands = sorted(camel_card_hands, key=cmp_to_key(compare_hands))
+	rank = 1
+	total_winnings = 0
+	for hand in sorted_hands:
+		hand.rank = rank
+		total_winnings = total_winnings + (hand.bid*rank) 
+		rank += 1
+	print('Solution for Day 7 Part 1 is {0}'.format(total_winnings))
