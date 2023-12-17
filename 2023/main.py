@@ -57,10 +57,18 @@ def run_seven():
 	from day_seven import part_two
 	part_two(data)
 
+def run_eight():
+	data = read_puzzle_input(".\datafiles\day_eight.txt")
+	from day_eight import part_one
+	part_one(data)
+	from day_eight import part_two_lazy
+	part_two_lazy(data)
+
 # run_one()
 # run_two()
 # run_three()
 # run_four()
 # run_five()
 # run_six()
-run_seven()
+# run_seven()
+run_eight()
